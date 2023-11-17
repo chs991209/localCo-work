@@ -1,7 +1,7 @@
 const allowanceDao = require('../models/allowanceDao');
 
-const postAllowance = async (userId, amount, year, month) => {
-  return await allowanceDao.postAllowance(userId, amount, year, month);
+const postAllowance = async (userId, allowance, year, month) => {
+  return await allowanceDao.postAllowance(userId, allowance, year, month);
 }
 
 const getAllowances = async (familyUserIds) => {
@@ -13,8 +13,8 @@ const getAllowances = async (familyUserIds) => {
   return result;
 }
 
-const updateAllowance = async (userId, amount, year, month) => {
-  return await allowanceDao.updateAllowances(userId, amount, year, month);
+const updateAllowance = async (userId, allowance, year, month) => {
+  return await allowanceDao.updateAllowances(userId, allowance, year, month);
 }
 
 const getAllowancesByYearMonth = async (userId, year, month) => { // Dao 재탕으로 인해 쓰임이 없어졌는데 연월별 용돈 검색 떄 활용할 수 있을 것 같아 두겠습니다.

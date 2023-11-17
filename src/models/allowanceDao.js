@@ -10,7 +10,7 @@ const postAllowance = async (userId, amount, year, month) => {
     [userId, amount, year, month]
   )
   if (result.affectedRows === 0) {
-    error.throwErr(400, 'ALREADY_EXISTING_ALLOWANCE');
+    error.throwErr(409, 'ALREADY_EXISTS');
   }
   return result;
 }
@@ -57,7 +57,6 @@ const getAllowanceByYearMonth = async (userId, year, month) => {
 }
 
 const deleteAllowance = async (userId, year, month) => {
-  console.log(userId, year, month)
   const result = await appDataSource.query(
     `
     DELETE FROM allowances 

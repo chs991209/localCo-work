@@ -8,12 +8,12 @@ const postAllowance = async (req, res) => { // 관리자만 가능
     if (!familyId || !roleId) {
       error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
     }
-    const { userName, amount, year, month } = req.body;
-    if (!userName ||!amount || !year || !month) {
+    const { userName, allowance, year, month } = req.body;
+    if (!userName ||!allowance || !year || !month) {
       error.throwErr(400, 'KEY_ERROR');
     }
-    const userId = await usersFamilyService.getAuthenticUserId(familyId, userName);
-    await allowanceService.postAllowance(userId, amount, year, month);
+    const userId = await usersFamilyService.  getAuthenticUserId(familyId, userName);
+    await allowanceService.postAllowance(userId, allowance, year, month);
     return res.status(200).json({message: 'POST_SUCCESS'});
   } catch (err) {
     console.error(err);
@@ -40,14 +40,14 @@ const updateAllowance = async (req, res) => { // 관리자만 가능
   try {
     const { familyId, roleId } = req.userData;
     if (!familyId || !roleId) {
-      error.throwErr(401, 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
+      error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
     }
-    const { userName, amount, year, month } = req.body;
-    if (!userName ||!amount || !year || !month) {
+    const { userName, allowance, year, month } = req.body;
+    if (!userName ||!allowance || !year || !month) {
       error.throwErr(400, 'KEY_ERROR');
     }
     const userId = await usersFamilyService.getAuthenticUserId(familyId, userName); // 삭제 대상 userName을 가진 users.id입니다
-    await allowanceService.updateAllowance(userId, amount, year, month);
+    await allowanceService.updateAllowance(userId, allowance, year, month);
     return res.status(200).json({message: 'PUT_SUCCESS'});
   } catch (err) {
     console.error(err);
@@ -62,7 +62,6 @@ const deleteAllowance = async (req, res) => { // 관리자만 가능
       error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
     }
     const { userName, year, month } = req.body;
-    console.log(userName, year, month);
     if (!userName || !year || !month) {
       error.throwErr(400, 'KEY_ERROR');
     }
