@@ -135,8 +135,13 @@ const getFixedMoneyFlowsByYearMonthDate = async (userId, year, month, date) => {
 
 const getGroupIdByFlowId = async (fixedFlowId) => {
   const groupId = await fixedMoneyFlowDao.getGroupIdsByFlowId(fixedFlowId);
+  if (!groupId.legnth) {
+    error.throwErr(404, 'NOT_EXISTING')
+  }
+  console.log(groupId)
   return await groupId[0]['groupId'];
 }
+
 
 const getFlowIdsByGroupId = async (groupId) => {
   const fixedFlowIdsObj = await fixedMoneyFlowDao.getFlowIdsByGroupId(groupId);
