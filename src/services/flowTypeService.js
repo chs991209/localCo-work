@@ -14,7 +14,13 @@ const getFlowStatusById = async (flowTypeId) => {
   return result[0].status;
 }
 
+const getIdByFlowStatus = async (type) => {
+  const result = await flowTypeDao.getIdByFlowStatus(type);
+  return result[0].id;
+}
+
 module.exports = {
   getFlowTypes,
-  getFlowStatusById
+  getFlowStatusById,
+  getIdByFlowStatus
 }

@@ -23,14 +23,43 @@ const getAllowance = async (userId) => { // 최신 순
     JOIN users 
     ON allowances.user_id = users.id
     WHERE user_id = ?
-    ORDER BY year DESC, month DESC
+    ORDER BY allowances.year DESC, allowances.month DESC
     `,
     [userId]
   )
 }
 
+const getAllowanceByYear = async (userId, year) => { // 최신 순
+  return await appDataSource.query(
+    `
+    SELECT allowances.id, users.name as userName, allowances.amount, allowances.year, allowances.month 
+    FROM allowances 
+    JOIN users 
+    ON allowances.user_id = users.id
+    WHERE user_id = ? 
+    AND allowances.year = ?
+    ORDER BY allowances.month DESC
+    `,
+    [userId, year]
+  )
+}
 
-const updateAllowances = async (userId, amount, year, month) => {
+const getAllowanceByYearMonth = async (userId, year, month) => {
+  return await appDataSource.query(
+    `
+    SELECT allowances.id, users.name as userName, allowances.amount, allowances.year, allowances.month 
+    FROM allowances 
+    JOIN users 
+    ON allowances.user_id = users.id
+    WHERE user_id = ? 
+    AND allowances.year = ?
+    AND allowances.month = ?
+    `,
+    [userId, year, month]
+  )
+}
+
+const updateAllowance = async (userId, amount, year, month) => {
   return await appDataSource.query(
     `
     UPDATE allowances 
@@ -43,17 +72,19 @@ const updateAllowances = async (userId, amount, year, month) => {
   )
 }
 
-const getAllowanceByYearMonth = async (userId, year, month) => {
-  return await appDataSource.query(
+const updateAllowanceById = async (allowanceId, amount, year, month) => {
+  const result = await appDataSource.query(
     `
-    SELECT id, user_id, amount, year, month 
-    FROM allowances 
-    WHERE user_id = ? 
-    AND year = ? 
-    AND month = ?
+    UPDATE allowances 
+    SET amount = ?, year = ?, month = ?
+    WHERE id = ? 
     `,
-    [userId, year, month]
+    [amount, year, month, allowanceId]
   )
+  if (result.affectedRows === 0) {
+    error.throwErr(409, 'ALREADY_EXISTS');
+  }
+  return result;
 }
 
 const deleteAllowance = async (userId, year, month) => {
@@ -72,10 +103,27 @@ const deleteAllowance = async (userId, year, month) => {
   return result;
 }
 
+const deleteAllowanceById = async (allowanceId) => {
+  const result = await appDataSource.query(
+    `
+    DELETE FROM allowances 
+    WHERE id = ? 
+    `,
+    [allowanceId]
+  )
+  if (result.affectedRows === 0) {
+    error.throwErr(404, 'NOT_EXISTING_OR_DELETED_ALLOWANCE');
+  }
+  return result;
+}
+
 module.exports = {
   postAllowance,
   getAllowance,
-  updateAllowances,
+  getAllowanceByYear,
   getAllowanceByYearMonth,
-  deleteAllowance
+  updateAllowance,
+  updateAllowanceById,
+  deleteAllowance,
+  deleteAllowanceById
 }
