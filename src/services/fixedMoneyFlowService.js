@@ -27,8 +27,10 @@ const postFixedMoneyFlows = async (userId, type, categoryId, memo, amount, start
               result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, l, integerStartDate, transaction));
             }
           }
-          for (let n = 1; n <= integerEndMonth; n++) {
-            result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, n, integerStartDate, transaction));
+          else if (k === integerEndYear) {
+            for (let n = 1; n <= integerEndMonth; n++) {
+              result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, n, integerStartDate, transaction));
+            }
           }
         }
       } else if (integerEndYear === integerStartYear) {
@@ -53,17 +55,6 @@ const postFixedMoneyFlows = async (userId, type, categoryId, memo, amount, start
     throw err;
   }
 }
-
-// const postFixedMoneyFlowsGroup = async () => {
-//   return await fixedMoneyFlowDao.postFixedMoneyFlowsGroup(); // Dao 에서 만든 fixed_money_flows_group 의 insertId를 반환합니다.
-// }
-
-// const postMiddleFixedMoneyFlows = async (fixedMoneyFlowIds, fixedMoneyFlowsGroupId) => {
-//   for (let i = 0; i < fixedMoneyFlowIds.length; i++) {
-//     await fixedMoneyFlowDao.postMiddleFixedMoneyFlow(fixedMoneyFlowIds[i], fixedMoneyFlowsGroupId);
-//   }
-//   return "SUCCESS";
-// }
 
 const getFixedMoneyFlows = async (userId) => {
   const flows = await fixedMoneyFlowDao.getFixedMoneyFlows(userId);
@@ -141,7 +132,6 @@ const getGroupIdByFlowId = async (fixedFlowId) => {
   console.log(groupId)
   return await groupId[0]['groupId'];
 }
-
 
 const getFlowIdsByGroupId = async (groupId) => {
   const fixedFlowIdsObj = await fixedMoneyFlowDao.getFlowIdsByGroupId(groupId);
