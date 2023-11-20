@@ -58,6 +58,21 @@ const getFixedMoneyFlowsByYearMonth = async (userId, year, month) => { // 월별
   )
 }
 
+const getUsedOrGotFixedMoneyFlowsByYearMonth = async (userId, typeId, year, month) => { // 월별
+  return await appDataSource.query(
+    `
+    SELECT id, user_id, flow_type_id, category_id, memo, amount, year, month, date 
+    FROM fixed_money_flows 
+    WHERE user_id = ?
+    AND flow_type_id = ?
+    AND year = ? 
+    AND month = ?
+    ORDER BY date DESC, amount DESC, flow_type_id, category_id
+    `,
+    [userId, typeId, year, month]
+  )
+}
+
 const getFixedMoneyFlowsByYearDate = async (userId, year, date) => {
   return await appDataSource.query(
     `
@@ -162,6 +177,7 @@ module.exports = {
   getFixedMoneyFlowsByYearMonth,
   getFixedMoneyFlowsByYearDate,
   getFixedMoneyFlowsByYearMonthDate,
+  getUsedOrGotFixedMoneyFlowsByYearMonth,
   getGroupIdsByFlowId,
   getFlowIdsByGroupId,
   updateFixedMoneyFlows,

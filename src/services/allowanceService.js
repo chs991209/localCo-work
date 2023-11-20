@@ -49,6 +49,21 @@ const getAllowanceByUserIdByYearMonthAndGetAmount = async (userId, year, month) 
   return await allowance.reduce((acc, allowance) => acc + allowance.amount, 0);
 }
 
+const getAllowanceByFamilyUserIdsByYearMonthAndGetAmount = async (familyUserIds, year, month) => { // 가족 전체 구성원의 특정 연, 월의  용돈의 금액을 합산합니다.
+  let allowances = [];
+  for (let i in familyUserIds) {
+    let allowance = await allowanceDao.getAllowanceByYearMonth(familyUserIds[i], year, month);
+    if (allowance.length) {
+      allowances.push(allowance[0]);
+    }
+  }
+  if (!allowances.length) { // 가족의 용돈이 할당돼 있지 않으면 0으로 사전에 처리합니다.
+    return 0;
+  }
+  return await allowances.reduce((acc, allowance) => acc + allowance.amount, 0);
+}
+
+
 const updateAllowance = async (userId, allowance, year, month) => { // userName, year, month(수정 전)가 수정 전의 지표인 함수
   return await allowanceDao.updateAllowance(userId, allowance, year, month);
 }
@@ -74,6 +89,7 @@ module.exports = {
   getAllowancesByUserIdByYear,
   getAllowanceByUserIdByYearMonth,
   getAllowanceByUserIdByYearMonthAndGetAmount,
+  getAllowanceByFamilyUserIdsByYearMonthAndGetAmount,
   updateAllowance,
   updateAllowanceById,
   deleteAllowance,

@@ -3,8 +3,7 @@ const categoryService = require('../services/categoryService');
 const userService = require('../services/userService')
 const flowTypeService = require('../services/flowTypeService');
 const error = require('../utils/error');
-const {appDataSource} = require('../utils/dataSource');
-const {postMiddleFixedMoneyFlow} = require('../models/fixedMoneyFlowDao');
+const { appDataSource } = require('../utils/dataSource');
 
 const postFixedMoneyFlows = async (userId, type, categoryId, memo, amount, startYear, startMonth, startDate, endYear, endMonth) => {
   try {
@@ -73,7 +72,7 @@ const getFixedMoneyFlows = async (userId) => {
   return mapped;
 }
 
-const getFixedMoneyFlowsByYearMonth = async (userId, year, month) => { // 월 별
+const getFixedMoneyFlowsByYearMonth = async (userId, year, month) => { // 월 별 고정 수입/지출 data 여러 개
   const flows = await fixedMoneyFlowDao.getFixedMoneyFlowsByYearMonth(userId, year, month);
   const mapped = await Promise.all(flows.map( async (flow) => ({
       id: flow.id,
@@ -88,6 +87,16 @@ const getFixedMoneyFlowsByYearMonth = async (userId, year, month) => { // 월 �
     }
   )));
   return mapped;
+}
+
+const getUsedFixedMoneyFlowsByYearMonthAndGetAmount = async (userId, year, month) => { // 월 별 고정 지출 사용량을 합산합니다.
+  let typeId = 2;
+  const flows = await fixedMoneyFlowDao.getUsedOrGotFixedMoneyFlowsByYearMonth(userId, typeId, year, month);
+  const mapped = await Promise.all(flows.map( async (flow) => ({
+      amount: flow.amount,
+    }
+  )));
+  return mapped.reduce((acc, allowance) => acc + allowance.amount, 0);
 }
 
 const getFixedMoneyFlowsByYearDate = async (userId, year, date) => { // 월 별
@@ -129,7 +138,6 @@ const getGroupIdByFlowId = async (fixedFlowId) => {
   if (!groupId.legnth) {
     error.throwErr(404, 'NOT_EXISTING')
   }
-  console.log(groupId)
   return await groupId[0]['groupId'];
 }
 
@@ -157,7 +165,6 @@ const deleteFixedMoneyFlows = async (flowIds, groupId, year, month, date) => {
   try {
     await appDataSource.transaction(async (transaction) => {
       let deletedIds = []
-      console.log(flowIds)
       for (let index in flowIds) {
         const deleteTargetId = await fixedMoneyFlowDao.selectDeletedFixedMoneyFlowsByDate(flowIds[index], year, month, date, transaction);
         deletedIds.push(await deleteTargetId);
@@ -182,6 +189,7 @@ module.exports = {
   postFixedMoneyFlows,
   getFixedMoneyFlows,
   getFixedMoneyFlowsByYearMonth,
+  getUsedFixedMoneyFlowsByYearMonthAndGetAmount,
   getFixedMoneyFlowsByYearDate,
   getFixedMoneyFlowsByYearMonthDate,
   getGroupIdByFlowId,

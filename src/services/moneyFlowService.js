@@ -5,15 +5,9 @@ const categoryService = require('../services/categoryService');
 const error = require('../utils/error');
 
 const postMoneyFlow = async (userId, type, categoryId, memo, amount, year, month, date) => {
-  let typeId = 1;
-  switch (type) {
-    case '수입':
-      break;
-    case '지출':
-      typeId += 1;
-      break;
-    default:
-      error.throwErr('NOT_FOUND_TYPE')
+  const typeId = await flowTypeService.getIdByFlowStatus(type);
+  if (!typeId) {
+    error.throwErr(404, 'NOT_EXISTING_TYPE');
   }
   return await moneyFlowDao.postMoneyFlow(userId, typeId, categoryId, memo, amount, year, month, date);
 }
@@ -32,6 +26,48 @@ const getMoneyFlowsByUserId = async (userId) => {
       date: flow.date,
     }
   )))
+}
+
+const getMoneyFlowsByFamilyUserId = async (familyUserIds) => {
+  let familyUserFlows = [];
+  for (let i in familyUserIds) {
+    const flows = await moneyFlowDao.getMoneyFlowsByUserId(familyUserIds[i]);
+    familyUserFlows = familyUserFlows.concat(await Promise.all(flows.map(async (flow) => {
+      return {
+        id: flow.id,
+        userName: await userService.getNameById(flow.user_id),
+        flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+        category: await categoryService.getNameById(flow.category_id),
+        memo: flow.memo,
+        amount: flow.amount,
+        year: flow.year,
+        month: flow.month,
+        date: flow.date,
+      };
+    })));
+  }
+  return familyUserFlows;
+}
+
+const getMoneyFlowsByFamilyUserIdByYear = async (familyUserIds, year) => {
+  let familyUserFlows = [];
+  for (let i in familyUserIds) {
+    const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYear(familyUserIds[i], year);
+    familyUserFlows = familyUserFlows.concat(await Promise.all(flows.map(async (flow) => {
+      return {
+        id: flow.id,
+        userName: await userService.getNameById(flow.user_id),
+        flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+        category: await categoryService.getNameById(flow.category_id),
+        memo: flow.memo,
+        amount: flow.amount,
+        year: flow.year,
+        month: flow.month,
+        date: flow.date,
+      };
+    })));
+  }
+  return familyUserFlows;
 }
 
 const getMoneyFlowsByUserIdByYear = async (userId, year) => {
@@ -66,6 +102,27 @@ const getMoneyFlowsByUserIdByYearMonth = async (userId, year, month) => {
   )))
 }
 
+const getMoneyFlowsByFamilyUserIdByYearMonth = async (familyUserIds, year, month) => {
+  let familyUserFlows = [];
+  for (let i in familyUserIds) {
+    const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearMonth(familyUserIds[i], year, month);
+    familyUserFlows = familyUserFlows.concat(await Promise.all(flows.map(async (flow) => {
+      return {
+        id: flow.id,
+        userName: await userService.getNameById(flow.user_id),
+        flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+        category: await categoryService.getNameById(flow.category_id),
+        memo: flow.memo,
+        amount: flow.amount,
+        year: flow.year,
+        month: flow.month,
+        date: flow.date,
+      };
+    })));
+  }
+  return familyUserFlows;
+}
+
 const getUsedMoneyFlowsByYearMonthAndGetSum = async (userId, year, month) => {
   let flowTypeId = 2;
   const flows = await moneyFlowDao.getUsedOrGotMoneyFlowsByUserIdByYearMonth(userId, flowTypeId, year, month);
@@ -88,6 +145,27 @@ const getMoneyFlowsByUserIdByYearDate = async (userId, year, date) => {
   )))
 }
 
+const getMoneyFlowsByFamilyUserIdByYearDate = async (familyUserIds, year, date) => {
+  let familyUserFlows = [];
+  for (let i in familyUserIds) {
+    const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearDate(familyUserIds[i], year, date);
+    familyUserFlows = familyUserFlows.concat(await Promise.all(flows.map(async (flow) => {
+      return {
+        id: flow.id,
+        userName: await userService.getNameById(flow.user_id),
+        flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+        category: await categoryService.getNameById(flow.category_id),
+        memo: flow.memo,
+        amount: flow.amount,
+        year: flow.year,
+        month: flow.month,
+        date: flow.date,
+      };
+    })));
+  }
+  return familyUserFlows;
+}
+
 const getMoneyFlowsByUserIdByYearMonthDate = async (userId, year, month, date) => {
   const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearMonthDate(userId, year, month, date);
   return await Promise.all(flows.map( async (flow) => ({
@@ -104,16 +182,31 @@ const getMoneyFlowsByUserIdByYearMonthDate = async (userId, year, month, date) =
   )))
 }
 
+const getMoneyFlowsByFamilyUserIdByYearMonthDate = async (familyUserIds, year, month, date) => {
+  let familyUserFlows = [];
+  for (let i in familyUserIds) {
+    const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearMonthDate(familyUserIds[i], year, month, date);
+    familyUserFlows = familyUserFlows.concat(await Promise.all(flows.map(async (flow) => {
+      return {
+        id: flow.id,
+        userName: await userService.getNameById(flow.user_id),
+        flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+        category: await categoryService.getNameById(flow.category_id),
+        memo: flow.memo,
+        amount: flow.amount,
+        year: flow.year,
+        month: flow.month,
+        date: flow.date,
+      };
+    })));
+  }
+  return familyUserFlows;
+}
+
 const updateMoneyFlow = async (id, userId, type, categoryId, memo, amount, year, month, date) => {
-  let typeId = 1;
-  switch (type) {
-    case '수입':
-      break;
-    case '지출':
-      typeId += 1;
-      break;
-    default:
-      error.throwErr('NOT_FOUND_TYPE')
+  const typeId = await flowTypeService.getFlowStatusById(type);
+  if (!typeId) {
+    error.throwErr(404, 'NOT_EXISTING_TYPE');
   }
   return await moneyFlowDao.updateMoneyFlow(id, userId, typeId, categoryId, memo, amount, year, month, date);
 }
@@ -130,6 +223,23 @@ module.exports = {
   getMoneyFlowsByUserIdByYearDate,
   getMoneyFlowsByUserIdByYearMonthDate,
   getUsedMoneyFlowsByYearMonthAndGetSum,
+  updateMoneyFlow,
+  deleteMoneyFlow
+}
+
+module.exports = {
+  postMoneyFlow,
+  getMoneyFlowsByUserId,
+  getMoneyFlowsByFamilyUserId,
+  getMoneyFlowsByUserIdByYear,
+  getMoneyFlowsByFamilyUserIdByYear,
+  getMoneyFlowsByUserIdByYearMonth,
+  getMoneyFlowsByFamilyUserIdByYearMonth,
+  getMoneyFlowsByUserIdByYearDate,
+  getMoneyFlowsByFamilyUserIdByYearDate,
+  getMoneyFlowsByUserIdByYearMonthDate,
+  getUsedMoneyFlowsByYearMonthAndGetSum,
+  getMoneyFlowsByFamilyUserIdByYearMonthDate,
   updateMoneyFlow,
   deleteMoneyFlow
 }
